@@ -1,0 +1,32 @@
+# docker-compose.yml
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+      - ./data:/app/data
+    environment:
+      - DATABASE_URL=sqlite:////app/data/data.db
+      - BASE_URL=http://localhost:8000
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  cli:
+    build: .
+    volumes:
+      - .:/app
+      - ./data:/app/data
+    environment:
+      - DATABASE_URL=sqlite:////app/data/data.db
+    entrypoint: [ "python", "-m", "app.cli.user_manager" ]
+
+  tests:
+    build: .
+    volumes:
+      - .:/app
+    environment:
+      - DATABASE_URL=sqlite:///./test.db
+    command: [ "pytest", "tests/" ]
